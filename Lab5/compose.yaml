@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=onlineshop
+    volumes:
+      - pgdbdata:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    networks:
+      - main_network
+  spring:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/app
+    environment:
+      POSTGRES_URL: jdbc:postgresql://db:5432/onlineshop
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: postgres
+    links:
+      - db:db
+    depends_on:
+      - db
+    networks:
+      - main_network
+    command: ["bash", "run_backend.sh"]
+    ports:
+      - "8080:8080"
+
+
+networks:
+  main_network:
+    driver: bridge
+
+volumes:
+  pgdbdata: null
